@@ -38,7 +38,8 @@ class PostModel {
         );
         return result.rows[0];
     }
-     static async getByAuthor(authorId) {
+
+    static async getByAuthor(authorId) {
         const result = await pool.query(
             `SELECT * FROM posts WHERE author_id = $1 ORDER BY created_at DESC`,
             [authorId]
