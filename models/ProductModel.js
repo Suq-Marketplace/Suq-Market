@@ -47,6 +47,7 @@ class ProductModel {
         );
         return result.rows[0];
     }
+
     static async getBySeller(sellerId) {
         const result = await pool.query(
             `SELECT * FROM products WHERE seller_id = $1 ORDER BY created_at DESC`,
@@ -113,6 +114,7 @@ class ProductModel {
         const result = await pool.query(sql, params);
         return result.rows;
     }
+
     static async getByCategory(category) {
         const result = await pool.query(
             `SELECT p.*, u.username as seller_name
