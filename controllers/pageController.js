@@ -29,16 +29,19 @@ async function getDashboard(req, res) {
         res.render('dashboard', { 
             title: 'Dashboard',
             user,
-            myProducts,
-            mySales: mySales.slice(0, 5),
-            myPurchases: myPurchases.slice(0, 5),
-            totalEarnings,
-            productCount: myProducts.length,
-            salesCount: mySales.length
+            myProducts: myProducts || [],
+            mySales: mySales || [],
+            myPurchases: myPurchases || [],
+            totalEarnings: totalEarnings || 0,
+            productCount: (myProducts || []).length,
+            salesCount: (mySales || []).length
         });
     } catch (error) {
         console.error(error);
-        res.render('error', { title: 'Error', message: 'Error loading dashboard' });
+        res.render('error', { 
+            title: 'Error', 
+            message: 'Error loading dashboard: ' + error.message 
+        });
     }
 }
 
@@ -103,6 +106,7 @@ function getRegister(req, res) {
     res.render('register', { title: 'Register', error: null });
 }
 
+// ✅ ADD THIS FUNCTION - It was missing!
 function getAddProduct(req, res) {
     res.render('add-product', { title: 'Add Product', error: null });
 }
@@ -171,36 +175,6 @@ async function getBlogPage(req, res) {
     }
 }
 
-async function getDashboard(req, res) {
-    try {
-        const user = req.session.user;
-        const ProductModel = require('../models/ProductModel');
-        const SaleModel = require('../models/SaleModel');
-        
-        const myProducts = await ProductModel.getBySeller(user.id);
-        const mySales = await SaleModel.getBySeller(user.id);
-        const myPurchases = await SaleModel.getByBuyer(user.id);
-        const totalEarnings = await SaleModel.getTotalEarnings(user.id);
-        
-        res.render('dashboard', { 
-            title: 'Dashboard',
-            user,
-            myProducts: myProducts || [],
-            mySales: mySales || [],
-            myPurchases: myPurchases || [],
-            totalEarnings: totalEarnings || 0,
-            productCount: (myProducts || []).length,
-            salesCount: (mySales || []).length
-        });
-    } catch (error) {
-        console.error(error);
-        res.render('error', { 
-            title: 'Error', 
-            message: 'Error loading dashboard: ' + error.message 
-        });
-    }
-}
-
 async function getSinglePost(req, res) {
     try {
         const post = await PostModel.getBySlug(req.params.slug);
@@ -221,7 +195,7 @@ module.exports = {
     getProductDetail,
     getLogin,
     getRegister,
-    getAddProduct,
+    getAddProduct,      
     getEditProduct,
     getSalesPage,
     getInventoryPage,
