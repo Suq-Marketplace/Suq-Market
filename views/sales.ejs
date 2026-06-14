@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+
+<h1>Sales & Purchases</h1>
+
+<div class="sales-summary">
+    <div class="summary-card">
+        <h3>Total Earnings</h3>
+        <div class="amount">$<%= totalEarnings.toFixed(2) %></div>
+    </div>
+    <div class="summary-card">
+        <h3>Total Spent</h3>
+        <div class="amount">$<%= totalSpent.toFixed(2) %></div>
+    </div>
+</div>
+
+<% if (mySales && mySales.length > 0) { %>
+    <h2>Your Sales (You sold these)</h2>
+    <table class="data-table">
+        <thead>
+            <tr><th>Product</th><th>Buyer</th><th>Quantity</th><th>Total</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+            <% mySales.forEach(sale => { %>
+                <tr>
+                    <td><%= sale.product_name %></td>
+                    <td><%= sale.buyer_name %></td>
+                    <td><%= sale.quantity %></td>
+                    <td>$<%= sale.total_price %></td>
+                    <td><%= new Date(sale.sale_date).toLocaleDateString() %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+<% } %>
+
+<% if (myPurchases && myPurchases.length > 0) { %>
+    <h2>Your Purchases (You bought these)</h2>
+    <table class="data-table">
+        <thead>
+            <tr><th>Product</th><th>Seller</th><th>Quantity</th><th>Total</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+            <% myPurchases.forEach(purchase => { %>
+                <tr>
+                    <td><%= purchase.product_name %></td>
+                    <td><%= purchase.seller_name %></td>
+                    <td><%= purchase.quantity %></td>
+                    <td>$<%= purchase.total_price %></td>
+                    <td><%= new Date(purchase.sale_date).toLocaleDateString() %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+<% } %>
+
+<% if ((!mySales || mySales.length === 0) && (!myPurchases || myPurchases.length === 0)) { %>
+    <p>No sales or purchases yet.</p>
+<% } %>
+
+<%- include('partials/footer') %>
