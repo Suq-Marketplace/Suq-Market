@@ -1,0 +1,14 @@
+<%- include('partials/header') %>
+
+<article class="blog-post">
+    <h1><%= post.title %></h1>
+    <div class="post-meta">
+        By <strong><%= post.author_name %></strong> on 
+        <%= new Date(post.created_at).toLocaleDateString() %>
+    </div>
+    <div class="post-content">
+        <%- post.content %>
+    </div>
+</article>
+
+<%- include('partials/footer') %>
