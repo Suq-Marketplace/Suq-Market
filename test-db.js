@@ -1,4 +1,3 @@
-// test-db.js - Quick test to verify database connection and data
 const { Pool } = require('pg');
 require('dotenv').config();
 
