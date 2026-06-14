@@ -1,0 +1,103 @@
+<%- include('partials/header') %>
+
+<h1>Dashboard</h1>
+<p class="welcome">Welcome back, <%= user.full_name || user.username %>!</p>
+
+<div class="dashboard-stats">
+    <div class="stat-card">
+        <div class="stat-number"><%= productCount || 0 %></div>
+        <div class="stat-label">Your Products</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">$<%= typeof totalEarnings === 'number' ? totalEarnings.toFixed(2) : parseFloat(totalEarnings || 0).toFixed(2) %></div>
+        <div class="stat-label">Total Earnings</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number"><%= salesCount || 0 %></div>
+        <div class="stat-label">Total Sales</div>
+    </div>
+</div>
+
+<div class="dashboard-actions">
+    <a href="/products/add" class="btn btn-primary">+ Add New Product</a>
+    <a href="/inventory" class="btn">Manage Inventory</a>
+    <a href="/sales" class="btn">View Sales</a>
+</div>
+
+<% if (myProducts && myProducts.length > 0) { %>
+    <h2>Your Products</h2>
+    <div class="products-grid small">
+        <% myProducts.slice(0, 4).forEach(product => { %>
+            <div class="product-card">
+                <h3><%= product.name %></h3>
+                <div class="price">$<%= typeof product.price === 'number' ? product.price.toFixed(2) : parseFloat(product.price).toFixed(2) %></div>
+                <div class="stock <%= product.stock_quantity <= 5 ? 'low-stock' : '' %>">
+                    Stock: <%= product.stock_quantity %>
+                </div>
+                <a href="/products/edit/<%= product.id %>" class="btn-small">Edit</a>
+            </div>
+        <% }); %>
+    </div>
+    <% if (myProducts.length > 4) { %>
+        <p class="text-center"><a href="/inventory">View all <%= myProducts.length %> products →</a></p>
+    <% } %>
+<% } else { %>
+    <div class="alert">
+        <p>You haven't added any products yet.</p>
+        <a href="/products/add" class="btn">Add Your First Product</a>
+    </div>
+<% } %>
+
+<% if (mySales && mySales.length > 0) { %>
+    <h2>Recent Sales</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Buyer</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% mySales.forEach(sale => { %>
+                <tr>
+                    <td><%= sale.product_name %></td>
+                    <td><%= sale.buyer_name %></td>
+                    <td><%= sale.quantity %></td>
+                    <td>$<%= typeof sale.total_price === 'number' ? sale.total_price.toFixed(2) : parseFloat(sale.total_price).toFixed(2) %></td>
+                    <td><%= new Date(sale.sale_date).toLocaleDateString() %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+<% } %>
+
+<% if (myPurchases && myPurchases.length > 0) { %>
+    <h2>Recent Purchases</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Seller</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% myPurchases.forEach(purchase => { %>
+                <tr>
+                    <td><%= purchase.product_name %></td>
+                    <td><%= purchase.seller_name %></td>
+                    <td><%= purchase.quantity %></td>
+                    <td>$<%= typeof purchase.total_price === 'number' ? purchase.total_price.toFixed(2) : parseFloat(purchase.total_price).toFixed(2) %></td>
+                    <td><%= new Date(purchase.sale_date).toLocaleDateString() %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+<% } %>
+
+<%- include('partials/footer') %>
