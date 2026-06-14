@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 require('dotenv').config();
+
 const pool = new Pool({
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
@@ -18,7 +19,7 @@ async function seedDatabase() {
         await pool.query('TRUNCATE TABLE post_product_mentions, reviews, sales, cart, wishlist, notifications, posts, products, users, categories RESTART IDENTITY CASCADE');
         console.log('Cleanup complete\n');
         console.log('Creating categories...');
-
+        
         const categories = [
             { name: 'Electronics', slug: 'electronics', description: 'Gadgets, devices, and tech accessories' },
             { name: 'Fashion', slug: 'fashion', description: 'Clothing, shoes, and accessories' },
@@ -31,7 +32,7 @@ async function seedDatabase() {
             { name: 'Toys', slug: 'toys', description: 'Games, puzzles, and collectibles' },
             { name: 'Pet Supplies', slug: 'pet-supplies', description: 'Food, toys, and accessories for pets' }
         ];
-
+        
         for (const cat of categories) {
             await pool.query(
                 `INSERT INTO categories (name, slug, description) 
@@ -51,7 +52,7 @@ async function seedDatabase() {
             { username: 'bob_wilson', email: 'bob@example.com', full_name: 'Bob Wilson', bio: 'Tech reviewer and gadget lover. Always looking for the next best thing.', role: 'user' },
             { username: 'alice_brown', email: 'alice@example.com', full_name: 'Alice Brown', bio: 'Book collector and avid reader. I buy and sell vintage books.', role: 'user' }
         ];
-
+        
         for (const user of users) {
             const result = await pool.query(
                 `INSERT INTO users (username, email, password_hash, full_name, bio, role) 
@@ -61,8 +62,8 @@ async function seedDatabase() {
             );
             userIds[user.username] = result.rows[0].id;
         }
-
-         console.log(`Created ${users.length} users`);
+        
+        console.log(`Created ${users.length} users`);
         console.log(' Login credentials: username = any of above, password = password123\n');
 
         console.log(' Creating products...');
@@ -116,8 +117,8 @@ async function seedDatabase() {
             { name: 'Cat Scratching Post', slug: 'cat-scratching-post', description: '32-inch scratching post with dangling toy.', price: 34.99, stock: 6, category: 'Pet Supplies', seller: 'john_doe', sku: 'PET-002' },
             { name: 'Pet Bed', slug: 'pet-bed', description: 'Orthopedic memory foam pet bed, washable cover.', price: 49.99, stock: 8, category: 'Pet Supplies', seller: 'jane_smith', sku: 'PET-003' }
         ];
-
-         const productIds = {};
+        
+        const productIds = {};
         for (const product of products) {
             const result = await pool.query(
                 `INSERT INTO products (name, slug, description, price, stock_quantity, category, seller_id, sku, images) 
@@ -181,7 +182,7 @@ async function seedDatabase() {
               content: '<p>Essential supplies:</p><ul><li>Food bowls</li><li>Comfortable bed</li><li>Leash and collar</li></ul><p>My dog Luna approves!</p>',
               excerpt: 'Prepare for your new pet', author: 'jane_smith', status: 'published' }
         ];
-
+        
         const postIds = {};
         for (const post of postsData) {
             const result = await pool.query(
@@ -214,7 +215,7 @@ async function seedDatabase() {
             { post: 'pet-care-guide', product: 'pet-bed', type: 'featured' },
             { post: 'pet-care-guide', product: 'dog-leash', type: 'related' }
         ];
-
+        
         for (const mention of mentions) {
             if (postIds[mention.post] && productIds[mention.product]) {
                 await pool.query(
