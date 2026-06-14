@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+
+<h1>SUQ Marketplace</h1>
+<p class="tagline">A quieter marketplace for things made with purpose.</p>
+
+<% if (featuredProducts && featuredProducts.length > 0) { %>
+    <h2>Featured Products</h2>
+    <div class="products-grid">
+        <% featuredProducts.forEach(product => { %>
+            <div class="product-card">
+                <% if (product.images && product.images[0]) { %>
+                    <img src="<%= product.images[0] %>" alt="<%= product.name %>">
+                <% } else { %>
+                    <div class="image-placeholder">📷</div>
+                <% } %>
+                <h3><%= product.name %></h3>
+                <div class="price">$<%= parseFloat(product.price).toFixed(2) %></div>
+                <p class="excerpt"><%= product.description ? product.description.substring(0, 100) : '' %>...</p>
+                <a href="/products/<%= product.slug %>" class="btn">View Details →</a>
+            </div>
+        <% }); %>
+    </div>
+<% } %>
+
+<% if (recentPosts && recentPosts.length > 0) { %>
+    <h2>Recent Thoughts</h2>
+    <div class="posts-list">
+        <% recentPosts.forEach(post => { %>
+            <div class="post-card">
+                <h3><%= post.title %></h3>
+                <div class="post-meta">By <strong><%= post.author_name %></strong></div>
+                <p><%= post.excerpt %></p>
+                <a href="/blog/<%= post.slug %>">Continue reading →</a>
+            </div>
+        <% }); %>
+    </div>
+<% } %>
+
+<%- include('partials/footer') %>
