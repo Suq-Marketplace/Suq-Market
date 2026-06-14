@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'SUQ Marketplace' %> | SUQ Marketplace</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="main-nav">
+            <div class="site-title">
+                <a href="/">SUQ Marketplace</a>
+            </div>
+            <a href="/products">Products</a>
+            <a href="/blog">Blog</a>
+            <% if (user) { %>
+                <a href="/dashboard">Dashboard</a>
+                <a href="#" id="logoutBtn">Logout (<%= user.username %>)</a>
+            <% } else { %>
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            <% } %>
+        </nav>
+        
+        <main>

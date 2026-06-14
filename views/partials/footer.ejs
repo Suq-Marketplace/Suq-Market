@@ -1,0 +1,51 @@
+        </main>
+
+        <footer>
+            <p>&copy; 2026 SUQ Marketplace. A quieter marketplace for things made with purpose.</p>
+        </footer>
+    </div>
+
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to logout?</p>
+            <div class="modal-buttons">
+                <button id="confirmLogout" class="btn btn-danger">Yes, Logout</button>
+                <button id="cancelLogout" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutModal = document.getElementById('logoutModal');
+        const confirmLogout = document.getElementById('confirmLogout');
+        const cancelLogout = document.getElementById('cancelLogout');
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                logoutModal.style.display = 'flex';
+            });
+        }
+
+        if (confirmLogout) {
+            confirmLogout.addEventListener('click', function() {
+                window.location.href = '/api/users/logout';
+            });
+        }
+
+        if (cancelLogout) {
+            cancelLogout.addEventListener('click', function() {
+                logoutModal.style.display = 'none';
+            });
+        }
+
+        window.addEventListener('click', function(e) {
+            if (e.target === logoutModal) {
+                logoutModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
