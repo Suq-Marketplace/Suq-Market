@@ -113,3 +113,24 @@ class ProductModel {
         const result = await pool.query(sql, params);
         return result.rows;
     }
+    static async getByCategory(category) {
+        const result = await pool.query(
+            `SELECT p.*, u.username as seller_name
+             FROM products p
+             JOIN users u ON p.seller_id = u.id
+             WHERE p.category = $1 AND p.status = 'active'
+             ORDER BY p.created_at DESC`,
+            [category]
+        );
+        return result.rows;
+    }
+
+    static async getCategories() {
+        const result = await pool.query(
+            `SELECT DISTINCT category FROM products WHERE status = 'active' ORDER BY category`
+        );
+        return result.rows.map(r => r.category);
+    }
+}
+
+module.exports = ProductModel;
