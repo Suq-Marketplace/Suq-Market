@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+
+<%
+    // Safely convert price and stock to numbers at the beginning
+    let numericPrice = typeof product.price === 'number' ? product.price : parseFloat(product.price);
+    let numericStock = typeof product.stock_quantity === 'number' ? product.stock_quantity : parseInt(product.stock_quantity);
+%>
+
+<div class="product-detail">
+    <div class="product-info">
+        <h1><%= product.name %></h1>
+        <div class="price-large">$<%= isNaN(numericPrice) ? '0.00' : numericPrice.toFixed(2) %></div>
+        <div class="stock-status <%= numericStock > 0 ? 'in-stock' : 'out-of-stock' %>">
+            <%= numericStock > 0 ? numericStock + ' in stock' : 'Out of stock' %>
+        </div>
+        <div class="seller-info">
+            <strong>Seller:</strong> <%= product.seller_fullname || product.seller_name %>
+        </div>
+        <div class="description">
+            <h3>Description</h3>
+            <p><%= product.description || 'No description available.' %></p>
+        </div>
+        
+        <% if (user && user.id !== product.seller_id && numericStock > 0) { %>
+            <form method="POST" action="/api/sales/purchase" class="purchase-form">
+                <input type="hidden" name="product_id" value="<%= product.id %>">
+                <div class="form-group">
+                    <label>Quantity:</label>
+                    <input type="number" name="quantity" value="1" min="1" max="<%= numericStock %>">
+                </div>
+                <div class="form-group">
+                    <label>Shipping Address:</label>
+                    <textarea name="shipping_address" required placeholder="Enter your full address"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Buy Now</button>
+            </form>
+        <% } else if (!user) { %>
+            <p><a href="/login">Login to purchase</a></p>
+        <% } else if (user.id === product.seller_id) { %>
+            <p>This is your product. <a href="/products/edit/<%= product.id %>">Edit it here</a></p>
+        <% } %>
+    </div>
+</div>
+
+<% if (sellerProducts && sellerProducts.length > 0) { %>
+    <h2>More from this seller</h2>
+    <div class="products-grid small">
+        <% sellerProducts.forEach(p => { 
+            let pPrice = typeof p.price === 'number' ? p.price : parseFloat(p.price);
+        %>
+            <div class="product-card">
+                <h3><%= p.name %></h3>
+                <div class="price">$<%= isNaN(pPrice) ? '0.00' : pPrice.toFixed(2) %></div>
+                <a href="/products/<%= p.slug %>">View →</a>
+            </div>
+        <% }); %>
+    </div>
+<% } %>
+
+<%- include('partials/footer') %>
