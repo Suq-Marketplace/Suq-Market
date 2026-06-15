@@ -116,3 +116,16 @@ async function seedDatabase() {
             { name: 'Cat Scratching Post', slug: 'cat-scratching-post', description: '32-inch scratching post with dangling toy.', price: 34.99, stock: 6, category: 'Pet Supplies', seller: 'john_doe', sku: 'PET-002' },
             { name: 'Pet Bed', slug: 'pet-bed', description: 'Orthopedic memory foam pet bed, washable cover.', price: 49.99, stock: 8, category: 'Pet Supplies', seller: 'jane_smith', sku: 'PET-003' }
         ];
+
+         const productIds = {};
+        for (const product of products) {
+            const result = await pool.query(
+                `INSERT INTO products (name, slug, description, price, stock_quantity, category, seller_id, sku, images) 
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+                 RETURNING id`,
+                [product.name, product.slug, product.description, product.price, product.stock, 
+                 product.category, userIds[product.seller], product.sku, 
+                 ['https://images.unsplash.com/placeholder.jpg?w=300']]
+            );
+            productIds[product.slug] = result.rows[0].id;
+        }
