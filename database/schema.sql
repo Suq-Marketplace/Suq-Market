@@ -167,3 +167,109 @@ CREATE TABLE coupons (
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_products_seller_id ON products(seller_id);
+CREATE INDEX idx_products_category ON products(category);
+CREATE INDEX idx_products_price ON products(price);
+CREATE INDEX idx_products_status ON products(status);
+CREATE INDEX idx_products_created_at ON products(created_at);
+CREATE INDEX idx_products_slug ON products(slug);
+CREATE INDEX idx_posts_author_id ON posts(author_id);
+CREATE INDEX idx_posts_slug ON posts(slug);
+CREATE INDEX idx_posts_status ON posts(status);
+CREATE INDEX idx_posts_created_at ON posts(created_at);
+CREATE INDEX idx_sales_buyer_id ON sales(buyer_id);
+CREATE INDEX idx_sales_seller_id ON sales(seller_id);
+CREATE INDEX idx_sales_product_id ON sales(product_id);
+CREATE INDEX idx_sales_sale_date ON sales(sale_date);
+CREATE INDEX idx_sales_status ON sales(status);
+CREATE INDEX idx_reviews_product_id ON reviews(product_id);
+CREATE INDEX idx_reviews_user_id ON reviews(user_id);
+CREATE INDEX idx_reviews_rating ON reviews(rating);
+CREATE INDEX idx_cart_user_id ON cart(user_id);
+CREATE INDEX idx_wishlist_user_id ON wishlist(user_id);
+CREATE INDEX idx_categories_slug ON categories(slug);
+CREATE INDEX idx_categories_parent_id ON categories(parent_id);
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_is_read ON notifications(is_read);
+CREATE INDEX idx_notifications_created_at ON notifications(created_at);
+CREATE INDEX idx_activity_logs_user_id ON activity_logs(user_id);
+CREATE INDEX idx_activity_logs_created_at ON activity_logs(created_at);
+CREATE INDEX idx_activity_logs_entity ON activity_logs(entity_type, entity_id);
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_posts_updated_at BEFORE UPDATE ON posts
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE OR REPLACE FUNCTION update_product_stock_on_sale()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE products 
+    SET stock_quantity = stock_quantity - NEW.quantity,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = NEW.product_id;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER trigger_update_stock
+    AFTER INSERT ON sales
+    FOR EACH ROW
+    EXECUTE FUNCTION update_product_stock_on_sale();
+
+CREATE OR REPLACE FUNCTION update_product_status_on_stock()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.stock_quantity = 0 AND OLD.stock_quantity > 0 THEN
+        NEW.status = 'out_of_stock';
+    ELSIF NEW.stock_quantity > 0 AND OLD.status = 'out_of_stock' THEN
+        NEW.status = 'active';
+    END IF;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER trigger_update_product_status
+    BEFORE UPDATE ON products
+    FOR EACH ROW
+    WHEN (OLD.stock_quantity IS DISTINCT FROM NEW.stock_quantity)
+    EXECUTE FUNCTION update_product_status_on_stock();
+
+CREATE OR REPLACE FUNCTION create_sale_notification()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO notifications (user_id, type, title, message, related_entity_id)
+    VALUES (
+        NEW.seller_id,
+        'sale',
+        'Product Sold!',
+        'Your product has been sold to customer #' || NEW.buyer_id || '. Quantity: ' || NEW.quantity,
+        NEW.id
+    );
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER trigger_sale_notification
+    AFTER INSERT ON sales
+    FOR EACH ROW
+    EXECUTE FUNCTION create_sale_notification();
