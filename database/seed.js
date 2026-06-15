@@ -214,3 +214,77 @@ async function seedDatabase() {
             { post: 'pet-care-guide', product: 'pet-bed', type: 'featured' },
             { post: 'pet-care-guide', product: 'dog-leash', type: 'related' }
         ];
+
+        for (const mention of mentions) {
+            if (postIds[mention.post] && productIds[mention.product]) {
+                await pool.query(
+                    `INSERT INTO post_product_mentions (post_id, product_id, mention_type) 
+                     VALUES ($1, $2, $3)
+                     ON CONFLICT (post_id, product_id) DO NOTHING`,
+                    [postIds[mention.post], productIds[mention.product], mention.type]
+                );
+            }
+        }
+        console.log(`Created ${mentions.length} post-product links\n`);
+
+        console.log(' Creating sample sale...');
+        
+        await pool.query(
+            `INSERT INTO sales (product_id, buyer_id, seller_id, quantity, unit_price, total_price, status, shipping_address)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+            [productIds['vintage-leather-jacket'], userIds['bob_wilson'], userIds['john_doe'], 
+             1, 89.99, 89.99, 'completed', '123 Main St, Cityville']
+        );
+        console.log('Sample sale created\n');
+
+        console.log(' Creating sample review...');
+        
+        await pool.query(
+            `INSERT INTO reviews (product_id, user_id, rating, title, comment, is_verified_purchase)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [productIds['vintage-leather-jacket'], userIds['bob_wilson'], 5, 
+             'Amazing jacket!', 'Exactly as described. Great quality!', true]
+        );
+        console.log('Sample review created\n');
+        console.log(' Creating coupons...');
+        
+        const coupons = [
+            { code: 'WELCOME10', description: '10% off your first order', type: 'percentage', value: 10.00, min: 20.00 },
+            { code: 'SUMMER20', description: '20% off summer sale', type: 'percentage', value: 20.00, min: 50.00 },
+            { code: 'FREESHIP', description: 'Free shipping on orders over $75', type: 'fixed_amount', value: 0.00, min: 75.00 }
+        ];
+        
+        for (const coupon of coupons) {
+            await pool.query(
+                `INSERT INTO coupons (code, description, discount_type, discount_value, minimum_order_amount, valid_from, valid_until, usage_limit)
+                 VALUES ($1, $2, $3, $4, $5, NOW(), NOW() + INTERVAL '1 year', 100)
+                 ON CONFLICT (code) DO NOTHING`,
+                [coupon.code, coupon.description, coupon.type, coupon.value, coupon.min]
+            );
+        }
+        console.log(`Created ${coupons.length} coupons\n`);
+
+        console.log(' =========================================');
+        console.log(' DATABASE SEEDING COMPLETE!');
+        console.log(' =========================================');
+        console.log('\n Login Credentials:');
+        console.log('   Username: john_doe, jane_smith, bob_wilson, alice_brown');
+        console.log('   Password: password123');
+        console.log('\n Summary:');
+        console.log(`   - ${categories.length} categories`);
+        console.log(`   - ${users.length} users`);
+        console.log(`   - ${products.length} products`);
+        console.log(`   - ${postsData.length} blog posts`);
+        console.log(`   - ${mentions.length} post-product links`);
+        console.log(`   - ${coupons.length} coupons`);
+        console.log('\n You can now start your application!');
+
+    } catch (error) {
+        console.error('Error seeding database:', error.message);
+        console.error(error);
+    } finally {
+        await pool.end();
+    }
+}
+
+seedDatabase();
