@@ -98,3 +98,72 @@ CREATE TABLE wishlist (
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, product_id)
 );
+
+CREATE TABLE post_product_mentions (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    mention_type VARCHAR(50) DEFAULT 'featured',
+    UNIQUE(post_id, product_id)
+);
+
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    slug VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    parent_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+    image_url TEXT,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE product_categories (
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+    PRIMARY KEY (product_id, category_id)
+);
+
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT false,
+    related_entity_id INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE session (
+    sid VARCHAR(255) PRIMARY KEY,
+    sess JSON NOT NULL,
+    expire TIMESTAMP NOT NULL
+);
+
+CREATE TABLE activity_logs (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(50),
+    entity_id INTEGER,
+    ip_address INET,
+    user_agent TEXT,
+    details JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE coupons (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    discount_type VARCHAR(20) NOT NULL,
+    discount_value DECIMAL(10, 2) NOT NULL,
+    minimum_order_amount DECIMAL(10, 2),
+    maximum_discount_amount DECIMAL(10, 2),
+    usage_limit INTEGER,
+    used_count INTEGER DEFAULT 0,
+    valid_from TIMESTAMP NOT NULL,
+    valid_until TIMESTAMP NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
