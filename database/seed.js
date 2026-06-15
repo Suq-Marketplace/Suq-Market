@@ -129,3 +129,88 @@ async function seedDatabase() {
             );
             productIds[product.slug] = result.rows[0].id;
         }
+        console.log(`Created ${products.length} products\n`);
+
+        console.log(' Creating blog posts...');
+        
+        const postsData = [
+            { title: 'Welcome to SUQ Marketplace', slug: 'welcome-to-suq', 
+              content: '<p>We are excited to launch our marketplace platform!</p><p>SUQ connects local sellers with buyers looking for unique, high-quality items.</p><p>Start exploring today and discover your next treasure!</p><p><strong>About the author:</strong> John has been selling vintage items for 5 years.</p>',
+              excerpt: 'Announcing the launch of SUQ Marketplace', author: 'john_doe', status: 'published' },
+            { title: 'How to Choose Vintage Clothing', slug: 'vintage-clothing-guide',
+              content: '<p>Vintage shopping can be overwhelming.</p><p><strong>Tips:</strong></p><ul><li>Check fabric composition</li><li>Look for wear signs</li><li>Know your measurements</li></ul><p><em>- John Doe, Vintage Specialist</em></p>',
+              excerpt: 'A buyer\'s guide to authentic vintage fashion', author: 'john_doe', status: 'published' },
+            { title: 'Tech Gift Guide 2026', slug: 'tech-gift-guide',
+              content: '<p>Top tech picks:</p><ul><li>Wireless Headphones</li><li>Smart Watch</li><li>Mechanical Keyboard</li></ul>',
+              excerpt: 'Best tech gifts under $150', author: 'john_doe', status: 'published' },
+            { title: 'Caring for Leather Goods', slug: 'leather-care',
+              content: '<p>Leather care tips:</p><ul><li>Condition every 6 months</li><li>Keep from direct sunlight</li><li>Clean spills immediately</li></ul>',
+              excerpt: 'How to maintain leather items', author: 'john_doe', status: 'published' },
+            { title: '10 Books Every Developer Should Read', slug: 'developer-books',
+              content: '<p>Essential programming books:</p><ol><li>Clean Code</li><li>The Pragmatic Programmer</li><li>You Don\'t Know JS</li></ol>',
+              excerpt: 'Must-read books for coders', author: 'john_doe', status: 'published' },
+            { title: 'Sustainable Living Tips', slug: 'sustainable-living',
+              content: '<p>Small changes, big impact:</p><ul><li>Buy second-hand</li><li>Choose handmade</li><li>Compost kitchen scraps</li></ul>',
+              excerpt: 'Reduce your environmental footprint', author: 'john_doe', status: 'published' },
+            { title: 'Weekend Home Decor Projects', slug: 'home-decor',
+              content: '<p>Transform your space:</p><ul><li>Add indoor plants</li><li>Use throw blankets</li><li>Display ceramics as art</li></ul>',
+              excerpt: 'Easy ways to refresh your home', author: 'john_doe', status: 'published' },
+            { title: 'Meditation for Mental Health', slug: 'meditation-guide',
+              content: '<p>10 minutes a day can reduce anxiety.</p><p>Find a quiet space, set a timer, focus on your breath.</p>',
+              excerpt: 'A simple practice for a calmer mind', author: 'john_doe', status: 'published' },
+            
+            { title: 'Behind the Scenes: Handmade Ceramics', slug: 'handmade-ceramics',
+              content: '<p>Each piece is hand-thrown, kiln-fired twice.</p><p>No two pieces are exactly alike!</p><p><strong>About me:</strong> I\'ve been creating pottery for 8 years. - Jane</p>',
+              excerpt: 'Meet the makers behind our handmade collection', author: 'jane_smith', status: 'published' },
+            { title: '5 Reasons to Buy Local', slug: 'buy-local',
+              content: '<ol><li>Unique products</li><li>Better quality</li><li>Lower carbon footprint</li><li>Support local economy</li><li>Personal connection</li></ol>',
+              excerpt: 'Why shopping locally benefits everyone', author: 'jane_smith', status: 'published' },
+            { title: 'Kitchen Essentials for Home Cooks', slug: 'kitchen-essentials',
+              content: '<p>Must-have tools:</p><ul><li>Cast iron skillet</li><li>Wooden cutting board</li><li>Quality knives</li></ul>',
+              excerpt: 'Must-have kitchen tools', author: 'jane_smith', status: 'published' },
+            { title: 'Fitness at Home: Essential Gear', slug: 'home-fitness',
+              content: '<p>Build your home gym:</p><ul><li>Yoga Mat</li><li>Resistance Bands</li><li>Adjustable Dumbbells</li></ul>',
+              excerpt: 'Home gym on a budget', author: 'jane_smith', status: 'published' },
+            { title: 'Skincare Routine for Beginners', slug: 'skincare-beginner',
+              content: '<p>Simple 3-step routine:</p><ol><li>Cleanse</li><li>Moisturize</li><li>Sunscreen</li></ol>',
+              excerpt: 'Start your skincare journey', author: 'jane_smith', status: 'published' },
+            { title: 'Beginner\'s Guide to Coffee Brewing', slug: 'coffee-guide',
+              content: '<p>Great coffee tips:</p><ul><li>Fresh beans</li><li>Burr grinder</li><li>Filtered water</li></ul>',
+              excerpt: 'Cafe-quality coffee at home', author: 'jane_smith', status: 'published' },
+            { title: 'Pet Care 101: New Owner Guide', slug: 'pet-care-guide',
+              content: '<p>Essential supplies:</p><ul><li>Food bowls</li><li>Comfortable bed</li><li>Leash and collar</li></ul><p>My dog Luna approves!</p>',
+              excerpt: 'Prepare for your new pet', author: 'jane_smith', status: 'published' }
+        ];
+
+        const postIds = {};
+        for (const post of postsData) {
+            const result = await pool.query(
+                `INSERT INTO posts (title, slug, content, excerpt, author_id, status) 
+                 VALUES ($1, $2, $3, $4, $5, $6) 
+                 RETURNING id`,
+                [post.title, post.slug, post.content, post.excerpt, userIds[post.author], post.status]
+            );
+            postIds[post.slug] = result.rows[0].id;
+        }
+        console.log(`Created ${postsData.length} blog posts\n`);
+
+        console.log(' Linking posts to products...');
+        
+        const mentions = [
+            { post: 'vintage-clothing-guide', product: 'vintage-leather-jacket', type: 'featured' },
+            { post: 'leather-care', product: 'vintage-leather-jacket', type: 'featured' },
+            { post: 'tech-gift-guide', product: 'wireless-headphones', type: 'featured' },
+            { post: 'tech-gift-guide', product: 'smart-watch', type: 'featured' },
+            { post: 'tech-gift-guide', product: 'mechanical-keyboard', type: 'related' },
+            { post: 'handmade-ceramics', product: 'handmade-ceramic-mug', type: 'featured' },
+            { post: 'kitchen-essentials', product: 'cast-iron-skillet', type: 'featured' },
+            { post: 'kitchen-essentials', product: 'wooden-cutting-board', type: 'related' },
+            { post: 'home-fitness', product: 'yoga-mat', type: 'featured' },
+            { post: 'home-fitness', product: 'resistance-bands', type: 'related' },
+            { post: 'skincare-beginner', product: 'skincare-set', type: 'featured' },
+            { post: 'home-decor', product: 'indoor-plant-set', type: 'featured' },
+            { post: 'home-decor', product: 'cozy-throw-blanket', type: 'related' },
+            { post: 'coffee-guide', product: 'coffee-maker', type: 'featured' },
+            { post: 'pet-care-guide', product: 'pet-bed', type: 'featured' },
+            { post: 'pet-care-guide', product: 'dog-leash', type: 'related' }
+        ];
